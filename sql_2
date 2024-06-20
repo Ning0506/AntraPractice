@@ -1,0 +1,143 @@
+USE AdventureWorks2019
+GO
+
+-- 1.
+SELECT COUNT(DISTINCT ProductId) 
+FROM Production.Product
+
+-- 2.
+SELECT COUNT(ProductSubcategoryID) FROM Production.Product
+WHERE ProductSubcategoryID IS NOT NULL
+
+-- 3.
+SELECT ProductSubcategoryID, COUNT(ProductSubcategoryID) AS CountedProducts
+FROM Production.Product
+GROUP BY ProductSubcategoryID
+
+-- 4.
+SELECT COUNT(ProductSubcategoryID) AS ProductsWithCategory
+FROM Production.Product
+WHERE ProductSubcategoryID IS NULL
+
+-- 5.
+SELECT SUM(Quantity) AS TotalQuantity 
+FROM Production.ProductInventory
+
+-- 6.
+SELECT ProductID, SUM(Quantity) As TheSum
+FROM Production.ProductInventory
+WHERE LocationID = 40 AND Quantity < 100
+GROUP BY ProductID
+
+-- 7.
+SELECT Shelf, ProductID, SUM(Quantity) AS TheSum 
+FROM Production.ProductInventory 
+WHERE LocationID = 40 AND Quantity < 100
+GROUP BY ProductID, Shelf
+
+-- 8.
+SELECT ProductID, AVG(Quantity) AS AvgQuantity 
+FROM Production.ProductInventory 
+WHERE LocationID = 10 
+GROUP BY ProductID
+
+-- 9.
+SELECT ProductID, Shelf, AVG(Quantity) AS TheAvg 
+FROM Production.ProductInventory 
+GROUP BY ProductID, Shelf
+
+-- 10.
+SELECT ProductID, Shelf, AVG(Quantity) AS TheAvg 
+FROM Production.ProductInventory 
+GROUP BY ProductID, Shelf 
+HAVING Shelf != 'N/A'
+
+-- 11.
+SELECT Color, Class, COUNT(ProductID) AS TheCount, AVG(ListPrice) AS AvgPrice 
+FROM Production.Product
+WHERE Color IS NOT NULL AND Class IS NOT NULL 
+GROUP BY Color, Class
+
+-- 12.
+SELECT Person.CountryRegion.Name AS Country, Person.StateProvince.Name AS Province 
+FROM Person.StateProvince JOIN Person.CountryRegion 
+ON Person.StateProvince.CountryRegionCode = Person.CountryRegion.CountryRegionCode
+
+-- 13.
+SELECT Person.CountryRegion.Name  AS Country, Person.StateProvince.Name AS Province
+FROM Person.StateProvince JOIN Person.CountryRegion
+ON Person.StateProvince.CountryRegionCode = Person.CountryRegion.CountryRegionCode 
+WHERE Person.CountryRegion.Name IN ('GERMANY', 'CANADA')
+
+-- 14.
+SELECT ODE.ProductName, Orders.OrderDate, YEAR(GETDATE()) AS Year 
+FROM [Order Details Extended] ODE JOIN Orders ON ODE.OrderID = Orders.OrderID 
+WHERE (YEAR(Orders.OrderDate) >= YEAR(GETDATE())-27) 
+
+-- 15.
+SELECT TOP 5 Orders.ShipPostalCode 
+FROM Customers JOIN Orders ON Customers.customerID = Orders.customerID 
+WHERE Customers.PostalCode IS NOT NULL
+
+-- 16.
+SELECT TOP 5 Customers.PostalCode 
+FROM [Order Details Extended] ODE JOIN Orders ON ODE.OrderID = Orders.OrderID  JOIN Customers ON Customers.customerID = Orders.customerID 
+WHERE Customers.PostalCode IS NOT NULL 
+GROUP BY Customers.PostalCode
+
+-- 17.
+SELECT Customers.City, COUNT(Customers.CustomerID) AS NumberofCustomers
+FROM Orders LEFT JOIN customers ON Orders.CustomerID = Customers.CustomerID
+GROUP BY Customers.City
+
+-- 18.
+SELECT Customers.City, COUNT(Customers.CustomerID) AS NumberofCustomers 
+FROM Orders RIGHT JOIN Customers ON Orders.CustomerID = Customers.CustomerID 
+GROUP BY Customers.City 
+HAVING COUNT(Customers.CustomerID) > 2
+
+-- 19.
+SELECT Customers.ContactName, Orders.OrderDate 
+FROM customers JOIN Orders ON Customers.CustomerID = Orders.CustomerID
+WHERE Orders.orderdate > '01-01-1998'
+
+-- 20.
+SELECT TOP 5 Customers.ContactName, Orders.OrderDate 
+FROM Customers JOIN Orders ON Customers.CustomerID = Orders.CustomerID 
+ORDER by Orders.OrderDate DESC
+
+-- 21.
+SELECT Customers.ContactName, COUNT(ODE.ProductID) AS ProdCount 
+FROM Customers JOIN Orders ON Customers.CustomerID = Orders.CustomerID JOIN [Order Details Extended] ODE ON ODE.OrderID = Orders.OrderID
+GROUP BY Customers.ContactName
+
+-- 22.
+SELECT Customers.ContactName, COUNT(ODE.productID) AS ProdCount
+FROM Customers JOIN Orders ON Customers.CustomerID = Orders.CustomerID JOIN [Order Details Extended] ODE ON ODE.OrderID = Orders.OrderID 
+GROUP BY Customers.ContactName 
+HAVING COUNT(ODE.ProductID) > 100
+
+-- 23.
+SELECT Suppliers.CompanyName, Shippers.CompanyName 
+FROM Suppliers CROSS JOIN Shippers
+
+-- 24.
+SELECT Orders.OrderDate, Products.ProductName
+FROM Orders JOIN [Order Details Extended] ODE on Orders.OrderID = ODE.OrderID JOIN Products ON
+Products.productID = ODE.ProductID
+
+-- 25.
+SELECT Employees.EmployeeID, Employees.FirstName + ' ' + Employees.LastName 
+AS Employee_Name, Employees.Title 
+FROM Employees 
+ORDER BY Employees.Title 
+
+--26.
+SELECT Employees.EmployeeID, Employees.FirstName + ' ' + Employees.LastName AS Manager_Name, 
+Employees.ReportsTo AS Employees_Reporting_to_Them
+FROM Employees 
+WHERE ReportsTo > 2 AND ReportsTo IS NOT NULL
+
+--27.
+SELECT Customers.City, Customers.ContactName AS CustomerName, Suppliers.ContactName AS SuppliersName
+FROM Customers FULL OUTER JOIN Suppliers ON Customers.City = Suppliers.City
